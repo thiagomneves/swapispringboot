@@ -1,0 +1,72 @@
+spring:
+  profiles:
+    active: dev
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  main:
+    banner-mode: 'OFF'
+    retry:
+      max-attempts: 5000
+      initial-interval: 1500
+      multiplier: 1.5
+      compatibility-verifier:
+        enabled=false:
+info:
+  app:
+    name: "@project.name@"
+    version: "@project.version@"
+    description: "@project.description@ "
+    base-package: "br.com.swapi.api"
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+server:
+  servlet:
+    context-path: /sw-springboot
+  port: 5000
+
+management:
+  server:
+    port: 9091
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health, shutdown, prometheus
+  endpoint:
+    shutdown:
+      enabled: true
+      health:
+        show-details: always
+        probes:
+          enabled: true
+        group:
+          readiness:
+            include: diskSpace
+
+opentracing:
+  service-name: swapispringboot-app
+  jaeger:
+    http-sender:
+      url: ${JAEGER_HOST:http://jaeger-collector.istio-system.svc.cluster.local:14268/api/traces}
+
+resilience4j:
+  retry:
+    configs:
+      default:
+        maxRetryAttempts: 2
+        waitDuration: 5000
+      instance:
+        global:
+          baseConfig: default
+backend:
+  swapi:
+    endpoint: "https://oek4e.wiremockapi.cloud/films/all"
+
+cache:
+  redis:
+    host: redis.infra.svc.cluster.local
+    port: 6379
+    ttlCache: 3
